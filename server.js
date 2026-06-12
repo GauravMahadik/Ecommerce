@@ -9,7 +9,7 @@ const app = express();
 app.use(cors({
   origin: [
     'https://ecommerce-backend-cmd8.onrender.com',
-    'http://localhost:3000'
+    'https://ecommerce-frontend-tau-bice.vercel.app/'
   ],
   credentials: true
 }));
