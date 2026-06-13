@@ -8,8 +8,8 @@ dotenv.config();
 const app = express();
 app.use(cors({
   origin: [
-    'https://ecommerce-backend-cmd8.onrender.com',
-    'https://ecommerce-frontend-tau-bice.vercel.app/'
+    'https://ecommerce-frontend-tau-bice.vercel.app',
+    'http://localhost:3000'
   ],
   credentials: true
 }));
