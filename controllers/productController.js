@@ -1,5 +1,31 @@
 const Product = require('../models/Product');
+exports.update = async (req, res) => {
+  try {
+    const data = { ...req.body };
 
+
+    if (req.files && req.files.length > 0) {
+      data.images = req.files.map(f => f.path);
+    }
+    if (typeof data.sizes === 'string') data.sizes = JSON.parse(data.sizes);
+    if (typeof data.colors === 'string') data.colors = JSON.parse(data.colors);
+    if (typeof data.tags === 'string') data.tags = JSON.parse(data.tags);
+    data.hasCustomSize = data.hasCustomSize === 'true' || data.hasCustomSize === true;
+
+    
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $set: data },
+      { new: true }
+    );
+   
+    res.json(product);
+  } catch (err) {
+    console.error('UPDATE ERROR:', err);
+    res.status(500).json({ message: err.message });
+  }
+};
 exports.getAll = async (req, res) => {
   try {
     const { category, search, sort, minPrice, maxPrice, page = 1, limit = 12 } = req.query;
@@ -16,7 +42,11 @@ exports.getAll = async (req, res) => {
     if (sort === 'rating') sortObj = { ratings: -1 };
 
     const total = await Product.countDocuments(query);
-    const products = await Product.find(query).sort(sortObj).skip((page - 1) * limit).limit(+limit);
+    const products = await Product.find(query)
+      .sort(sortObj)
+      .skip((page - 1) * limit)
+      .limit(+limit);
+
     res.json({ products, total, pages: Math.ceil(total / limit), page: +page });
   } catch (err) { res.status(500).json({ message: err.message }); }
 };
@@ -43,10 +73,16 @@ exports.create = async (req, res) => {
     if (typeof data.sizes === 'string') data.sizes = JSON.parse(data.sizes);
     if (typeof data.colors === 'string') data.colors = JSON.parse(data.colors);
     if (typeof data.tags === 'string') data.tags = JSON.parse(data.tags);
+    data.hasCustomSize = data.hasCustomSize === 'true' || data.hasCustomSize === true;
     const product = await Product.create(data);
     res.status(201).json(product);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('CREATE PRODUCT ERROR:', err); // ← this logs exact error
+    res.status(500).json({ message: err.message });
+  }
 };
+
+
 
 exports.update = async (req, res) => {
   try {
@@ -56,9 +92,19 @@ exports.update = async (req, res) => {
     }
     if (typeof data.sizes === 'string') data.sizes = JSON.parse(data.sizes);
     if (typeof data.colors === 'string') data.colors = JSON.parse(data.colors);
-    const product = await Product.findByIdAndUpdate(req.params.id, data, { new: true });
+    if (typeof data.tags === 'string') data.tags = JSON.parse(data.tags);
+    data.hasCustomSize = data.hasCustomSize === 'true' || data.hasCustomSize === true;
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $set: data },
+      { new: true }
+    );
     res.json(product);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE ERROR:', err);
+    res.status(500).json({ message: err.message });
+  }
 };
 
 exports.remove = async (req, res) => {
